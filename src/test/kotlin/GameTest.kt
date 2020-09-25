@@ -13,6 +13,18 @@ class GameTest {
         assertEquals(START_DECK_SIZE, game.deck.size)
     }
 
+    @Test(expected = InvalidNumberOfPlayersException::class)
+    fun gameIsNotCreatedWithNotEnoughPlayer() {
+        val players = listOf<Player>(Player())
+        val game = Game(players)
+    }
+
+    @Test(expected = InvalidNumberOfPlayersException::class)
+    fun gameIsNotCreatedWithTooManyPlayers() {
+        val players = List(11){Player()}
+        val game = Game(players)
+    }
+
     @Test
     fun gameStarted() {
         val players = listOf<Player>(Player(), Player())
@@ -29,5 +41,19 @@ class GameTest {
             assertEquals(START_HAND_SIZE, player.hand.size)
         }
         assertEquals(1, game.discard.size)
+
+        assertTrue(players.contains(game.currentPlayer))
+    }
+
+    @Test
+    fun playerTurnPlayCard() {
+        val players = listOf<Player>(Player(), Player())
+        val game = Game(players)
+
+        game.start()
+        game.cardPlayed()
+
+        assertEquals(game.currentPlayer.hand.size, START_HAND_SIZE - 1)
+        assertEquals(game.discard.size, 2)
     }
 }
