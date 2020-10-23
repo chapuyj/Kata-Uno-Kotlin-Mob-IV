@@ -1,4 +1,4 @@
-import Game.Companion.START_DECK_SIZE
+import Deck.Companion.START_DECK_SIZE
 import Game.Companion.START_HAND_SIZE
 import org.junit.Assert.*
 import org.junit.Test
@@ -40,8 +40,8 @@ class GameTest {
         game.players.forEach{player ->
             assertEquals(START_HAND_SIZE, player.hand.size)
         }
-        assertEquals(1, game.discard.size)
-
+        assertNotNull(game.discard)
+        // assert première carte dans la défausse
         assertTrue(players.contains(game.currentPlayer))
     }
 
@@ -53,7 +53,7 @@ class GameTest {
         game.start()
         game.cardPlayed()
 
+        // assert carte dans la défausse
         assertEquals(game.currentPlayer.hand.size, START_HAND_SIZE - 1)
-        assertEquals(game.discard.size, 2)
     }
 }
