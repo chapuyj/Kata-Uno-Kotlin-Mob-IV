@@ -1,4 +1,4 @@
-class Game(val players: List<Player>) {
+class Game(val playerNames: List<String>) {
 
     companion object {
         const val MIN_NUMBER_OF_PLAYER = 2
@@ -7,50 +7,39 @@ class Game(val players: List<Player>) {
         const val START_HAND_SIZE = 7
     }
 
-    var currentPlayer: Player = NullPlayer()
-    lateinit var discard : Card
-    var deck = Deck.createStarterDeck()
-        private set(value) {
-            field = value
-        }
+    lateinit var gameState : GameState
 
     init {
-        if(players.size !in MIN_NUMBER_OF_PLAYER..MAX_NUMBER_OF_PLAYER) throw InvalidNumberOfPlayersException()
+        if(playerNames.size !in MIN_NUMBER_OF_PLAYER..MAX_NUMBER_OF_PLAYER) throw InvalidNumberOfPlayersException()
+
     }
 
     fun start() {
-        dealCards()
-        putFirstCardInDiscard()
-        pickFirstPlayer()
+        val players = playerNames.map { Player() }
+        val currentPlayer = players.first()
+        var deck = Deck.createStarterDeck()
+        deck = dealCards(players, deck)
+        val (discard, newDeck) = deck.draw(1)
+        gameState = GameState(players, discard.first(), newDeck, currentPlayer)
     }
 
-    private fun pickFirstPlayer() {
-        currentPlayer = players.first()
-    }
-
-    private fun dealCards() {
+    private fun dealCards(players: List<Player>, deck: Deck) : Deck {
+        var deck = deck
         players.forEach { player ->
-            dealCards(player)
+            deck = dealCards(player, deck)
         }
+        return deck
     }
 
-    private fun dealCards(player: Player) {
-        val drawn = draw(START_HAND_SIZE)
-        player.hand += drawn
-    }
-
-    private fun putFirstCardInDiscard() {
-        discard = draw(1).first()
-    }
-
-    private fun draw(number: Int) : List<Card> {
-        val (drawn, newDeck) = deck.draw(number)
-        deck = newDeck
-        return drawn
+    private fun dealCards(player: Player, deck: Deck) : Deck {
+        val (drawn, newDeck) = deck.draw(START_HAND_SIZE)
+        player.hand += drawn //TODO make the player immutable
+        return newDeck
     }
 
     fun cardPlayed() {
-        discard = currentPlayer.hand.removeAt(0)
+        val discardedCard = gameState.currentPlayer.hand.removeAt(0)
+        gameState = gameState.copy(discard = discardedCard)
     }
 }
 
